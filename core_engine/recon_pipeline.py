@@ -58,13 +58,21 @@ print(f"Test targets for {target_domain}: {test_targets}")
 print(f"\nInitializing network telemetry probe for the top {len(test_targets)} assets...")
 
 for loop in test_targets:
-    print(f"Probing {loop} for network reachability and service enumeration...")
-    probe_result = subprocess.run(['ping', '-c', '1', loop], capture_output=True, text=True)
-    if probe_result.returncode == 0:
-        print(f"    [+] Success: {loop} is reachable.")
-    else:
-        print(f"    [-] Warning: {loop} is not reachable or blocked by firewall.")
+    print(f" -> Scanning network ports on host: {loop}")
+    nmap_args = ['nmap', '-Pn', '-p', '22,80,443,3306', loop]
+    port_result = subprocess.run(nmap_args, capture_output=True, text=True)
+    print(port_result.stdout)
+    print("-" * 60)
 
 # Print diagnostic metrics to the terminal (Runs regardless of Cache Hit or Miss)
 print(f"\nVerified unique subdomains found for {target_domain}: {len(unique_subdomains)}")
 print(f"Scan completed at: {current_time}")
+
+
+# for loop in test_targets:
+#     print(f"Probing {loop} for network reachability and service enumeration...")
+#     probe_result = subprocess.run(['ping', '-c', '1', loop], capture_output=True, text=True)
+#     if probe_result.returncode == 0:
+#         print(f"    [+] Success: {loop} is reachable.")
+#     else:
+#         print(f"    [-] Warning: {loop} is not reachable or blocked by firewall.")
