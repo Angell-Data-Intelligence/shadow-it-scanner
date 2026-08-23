@@ -57,22 +57,44 @@ test_targets = unique_subdomains[:5]  # Sample of first 5 unique subdomains for 
 print(f"Test targets for {target_domain}: {test_targets}")
 print(f"\nInitializing network telemetry probe for the top {len(test_targets)} assets...")
 
+recon_report = []
+
 for loop in test_targets:
     print(f" -> Scanning network ports on host: {loop}")
     nmap_args = ['nmap', '-Pn', '-p', '22,80,443,3306', loop]
     port_result = subprocess.run(nmap_args, capture_output=True, text=True)
-    print(port_result.stdout)
+    
+    host_telemetry = {}
+    
+    nmap_lines = port_result.stdout.splitlines()
+    
+    for line in nmap_lines:
+        if "22/tcp" in line or "80/tcp" in line or "443/tcp" in line or "3306/tcp" in line:
+            # Split the line by its blank spaces to isolate the words
+            line_parts = line.split()
+            # Extract the port/protocol string (e.g., '22/tcp') and strip the '/tcp' suffix
+            port_number = line_parts[0].split('/')[0]
+            # Extract the status word (e.g., 'open' or 'closed')
+            port_status = line_parts[1]
+            # Commit the clean key-value pair straight to your tracking dictionary
+            host_telemetry[port_number] = port_status
+            # If the dictionary is still empty, it means the firewall blocked the request
+    if not host_telemetry:
+        for port in ['22', '80', '443', '3306']:
+            host_telemetry[port] = "filtered/blocked"
+    host_record = {
+    "subdomain": loop,
+    "port_telemetry": host_telemetry
+    }
+    recon_report.append(host_record)
+
+    print(f"    [+] Parsed Telemetry for {loop}: {host_telemetry}")
     print("-" * 60)
+
+report_filepath = f"shadow-it-scanner/data_outputs/{target_domain}_recon_report.json"
+with open(report_filepath, 'w') as json_file:
+    json.dump(recon_report, json_file, indent=4)
 
 # Print diagnostic metrics to the terminal (Runs regardless of Cache Hit or Miss)
 print(f"\nVerified unique subdomains found for {target_domain}: {len(unique_subdomains)}")
 print(f"Scan completed at: {current_time}")
-
-
-# for loop in test_targets:
-#     print(f"Probing {loop} for network reachability and service enumeration...")
-#     probe_result = subprocess.run(['ping', '-c', '1', loop], capture_output=True, text=True)
-#     if probe_result.returncode == 0:
-#         print(f"    [+] Success: {loop} is reachable.")
-#     else:
-#         print(f"    [-] Warning: {loop} is not reachable or blocked by firewall.")
