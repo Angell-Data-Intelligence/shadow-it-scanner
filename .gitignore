@@ -1,3 +1,4 @@
 shadow-it-scanner/data_outputs/
 subdomains.txt
 *.json
+targets.txt
