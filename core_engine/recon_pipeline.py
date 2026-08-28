@@ -3,6 +3,13 @@ import subprocess
 import json
 import argparse
 from datetime import datetime, timezone
+import requests
+from dotenv import load_dotenv
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+load_dotenv()
 
 # =====================================================================
 # BRAND BANNER :)
@@ -136,7 +143,7 @@ for target_domain in target_list:
     # Extract a dynamic slice of targets from the unique list based on user limits
     test_targets = unique_subdomains[:args.limit]
     print(f"Test targets for {target_domain}: {test_targets}")
-    print(f"\nInitializing network telemetry probe for the top {len(test_targets)} assets...")
+    print(f"\nInitialsing network telemetry probe for the top {len(test_targets)} assets...")
 
     recon_report = []
 
@@ -183,9 +190,8 @@ for target_domain in target_list:
 # =====================================================================
 # PHASE 3: AUTOMATED AI TRIAGE & EXPLOITABILITY FILTERING
 # =====================================================================
-print(f"\n[*] Initiating Phase 3 data serialization and AI triage preparation...")
+print(f"\n[*] Initiating Phase 3 data serialsation and AI triage preparation...")
 
-# Dynamic target reference loop to read our completed master database report
 for active_target in target_list:
     report_path = f"shadow-it-scanner/data_outputs/{active_target}_recon_report.json"
 
@@ -194,10 +200,9 @@ for active_target in target_list:
         with open(report_path, 'r') as json_file:
             compiled_report_data = json.load(json_file)
 
-        # Initialise a list array container to hold only high-risk exposed assets
         exposed_assets_queue = []
         
-        # 🟢 SIMULATION LEAK INJECTION (Placing it right here allows the test to fire)
+        # Force a simulation leak to verify the AI prompt compilation logic
         exposed_assets_queue.append({
             "exposed_subdomain": f"staging-db.{active_target}", 
             "vulnerable_gateways": {"3306": "open"}
@@ -207,13 +212,11 @@ for active_target in target_list:
             subdomain_name = record["subdomain"]
             telemetry_matrix = record["port_telemetry"]
             
-            # Isolate ports that aren't trapped behind a filtered status blanket
             actionable_ports = {}
             for port_id, port_state in telemetry_matrix.items():
                 if port_state != "filtered/blocked":
                     actionable_ports[port_id] = port_state
                     
-            # If an asset exposes actionable ports, commit it to the high-risk queue
             if actionable_ports:
                 exposed_record = {
                     "exposed_subdomain": subdomain_name,
@@ -224,11 +227,10 @@ for active_target in target_list:
         print(f"    [+] High-Value Target Isolation Complete for {active_target}.")
         print(f"    [+] Total exposed assets flagged for AI context analysis: {len(exposed_assets_queue)}")
 
-        # Trigger the AI Triage engine loop ONLY if an actual live vulnerability exposure is caught
+        # Trigger the AI prompt assembler if live vulnerabilities exist
         if len(exposed_assets_queue) > 0:
             print(f"    [!] Warning: Live exposures caught for {active_target}. Assembling AI Context...")
             
-            # Define the system persona directive
             ai_system_prompt = (
                 f"You are an elite B2B cybersecurity consulting analyst working for Angell Data Intelligence.\n"
                 f"Your target client is: {active_target}.\n"
@@ -236,16 +238,47 @@ for active_target in target_list:
                 f"triage their exploitability, and type a clean, non-technical executive remediation summary for the company board."
             )
             
-            # Serialise data
             ai_data_context = json.dumps(exposed_assets_queue, indent=2)
-            
-            # Combine into master prompt payload string
             master_ai_prompt = f"{ai_system_prompt}\n\n### LIVE TELEMETRY EXPOSURE DATA:\n{ai_data_context}"
             
             print(f"    [+] Master AI prompt payload successfully generated for {active_target} ({len(master_ai_prompt)} characters).")
-            
-            # 🟢 Drop your debug inspection line right here:
             print(f"\n=== DEBUG MASTER PROMPT SEED ===\n{master_ai_prompt}\n================================")
-        else:
-            print(f"    [+] Architecture Verification: No live exposures found for {active_target}. Skipping AI API transactions to save resource capital.")
-
+            
+            # Transmit the live context to Anthropic via HTTP POST
+            print(f"    [*] Transmitting live telemetry context to Anthropic Claude-3.5-Sonnet API...")
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+            
+            if not api_key:
+                print("    [-] Critical Error: Anthropic API Key missing from local .env environment space.")
+            else:
+                api_headers = {
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json"
+                }
+                
+                api_payload = {
+                    "model": "claude-3-5-sonnet-20240620",
+                    "max_tokens": 1000,
+                    "temperature": 0.2,
+                    "messages": [
+                        {"role": "user", "content": master_ai_prompt}
+                    ]
+                }
+                
+                # Execute the live cloud handshake transaction over the official Anthropic API router
+                api_response = requests.post("https://anthropic.com", headers=api_headers, json=api_payload)                
+                
+                # 🟢 STEP 1: Check the status code FIRST to prevent the crash
+                if api_response.status_code == 200:
+                    # [INDENTED 20 SPACES] Only parse JSON if the response is completely successful (200)
+                    response_json = api_response.json()
+                    ai_report_text = response_json["content"][0]["text"]
+                    
+                    print(f"\n👑 === OFFICIAL ADI EXECUTIVE SECURITY REPORT FOR {active_target} ===")
+                    print(ai_report_text)
+                    print("====================================================================\n")
+                else:
+                    # 🟢 STEP 2: If the key is a test placeholder (401 error), catch it safely here without crashing
+                    print(f"    [-] API Communication Fault. Server returned status code: {api_response.status_code}")
+                    print(f"    [-] Diagnostic Log: {api_response.text}")
