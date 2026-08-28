@@ -53,10 +53,12 @@ BANNER = """
 parser = argparse.ArgumentParser(description='Angell Data Intelligence - Shadow IT Asset Discovery and Reconnaissance Pipeline')
 parser.add_argument('--target', type=str, required=True, help='Target company domain for subdomain discovery')
 parser.add_argument('--limit', type=int, default=20, help='the maximum number of subdomains to pass to the network telemetry engine')
+parser.add_argument('--tier', type=str, default='scout', choices=['scout', 'radar', 'sentinel'], help='The customer subscription plan tier')
 args = parser.parse_args()
 
-# Capture the raw input argument string uniformly
+# Capture the raw input argument parameters uniformly
 target_input = args.target
+account_tier = args.tier.lower()
 
 # Clear the screen buffer and render the master corporate interface
 os.system('clear')
@@ -71,6 +73,52 @@ if target_input.endswith('.txt'):
         print(f"[*] Bulk configuration detected. Ingesting targets from: {target_input}")
         with open(target_input, 'r') as f:
             target_list = [line.strip() for line in f.read().splitlines() if line.strip()]
+    else:
+        print(f"[-] Critical Error: Specified target file '{target_input}' not found on disk.")
+        exit(1)
+else:
+    # If it's a single domain, wrap it inside a single-element list array
+    target_list = [target_input]
+
+# =====================================================================
+# SAAS SUBSCRIPTION RESOURCE CONTROLLER & THROTTLING GATE
+# =====================================================================
+if account_tier == 'scout':
+    # Tier 1 Rule: Block all bulk file paths and enforce a hard limit of 20
+    if target_input.endswith('.txt'):
+        print(f"\n[!] Resource Exhausted: Bulk text file ingestion is blocked on the 'The Hunter's Scout' layer (£29/mo).")
+        print(f"[!] Upgrade your account to the 'The Flagship Radar' (£99/mo) to unlock multi-target scans instantly.")
+        exit(1)
+    if args.limit > 20:
+        print(f"\n[!] Parameter Throttled: Your plan restricts host scans to a maximum depth of 20 assets.")
+        print(f"[!] Upgrading to the 'The Flagship Radar' increases this limit to 100.")
+        args.limit = 20
+
+elif account_tier == 'radar':
+    # Tier 2 Rule: Allow text files but enforce a ceiling cap of 5 targets and a limit of 100
+    if args.limit > 100:
+        print(f"\n[!] Parameter Throttled: The 'The Flagship Radar Layer' restricts scanning depth to 100 assets per target.")
+        print(f"[!] Upgrade to 'The Enterprise Sentinel' (£299/mo) to unlock unthrottled maximum scanning power.")
+        args.limit = 100
+
+print(f"[*] Account Authorization Confirmed. Active Plan Verification: [{account_tier.upper()}]")
+
+# Initialize an empty array to collect our scanning objectives
+target_list = []
+
+# Evaluate if the incoming argument is a bulk text file or a single domain string
+if target_input.endswith('.txt'):
+    if os.path.exists(target_input):
+        print(f"[*] Bulk configuration detected. Ingesting targets from: {target_input}")
+        with open(target_input, 'r') as f:
+            raw_targets = [line.strip() for line in f.read().splitlines() if line.strip()]
+            
+        if account_tier == 'radar' and len(raw_targets) > 5:
+            print(f"[!] Throttling Notice: 'Radar Layer' accounts are restricted to 5 targets per execution cycle.")
+            print(f"[!] Slicing target list down to the first 5 entries...")
+            target_list = raw_targets[:5]
+        else:
+            target_list = raw_targets
     else:
         print(f"[-] Critical Error: Specified target file '{target_input}' not found on disk.")
         exit(1)
