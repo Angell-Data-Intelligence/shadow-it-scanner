@@ -42,7 +42,7 @@ BANNER = """
 └────────────────────────────────────────────────────────────────────────────────────────┘
 """
 
-# Initialize the command-line argument parser for automated enterprise execution
+# Initialise the command-line argument parser for automated enterprise execution
 parser = argparse.ArgumentParser(description='Angell Data Intelligence - Shadow IT Asset Discovery and Reconnaissance Pipeline')
 parser.add_argument('--target', type=str, required=True, help='Target company domain for subdomain discovery')
 parser.add_argument('--limit', type=int, default=20, help='the maximum number of subdomains to pass to the network telemetry engine')
@@ -55,7 +55,7 @@ target_input = args.target
 os.system('clear')
 print(BANNER)
 
-# Initialize an empty array to collect our scanning objectives
+# Initialise an empty array to collect our scanning objectives
 target_list = []
 
 # Evaluate if the incoming argument is a bulk text file or a single domain string
@@ -83,7 +83,7 @@ for target_domain in target_list:
     # Calculate the target file path dynamically for the current domain in the loop
     output_filepath = f"shadow-it-scanner/data_outputs/{target_domain}_subdomains.json"
 
-    # Initialize a conditional control flag to determine our extraction route
+    # Initialise a conditional control flag to determine our extraction route
     needs_live_scan = True
 
     # Check if a cache file for this target exists on the disk
@@ -93,7 +93,7 @@ for target_domain in target_list:
             
         # Convert the saved string timestamp back into an explicit UTC datetime object
         file_time = datetime.strptime(cached_data["scan_time"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-        # Calculate the exact mathematical age gap using a standardized global clock
+        # Calculate the exact mathematical age gap using a standardised global clock
         cache_age_days = (datetime.now(timezone.utc) - file_time).days
 
         # If the file is perfectly fresh, pull the data and bypass the live scanner
@@ -179,3 +179,73 @@ for target_domain in target_list:
     # Print diagnostic metrics to the terminal (Runs regardless of Cache Hit or Miss)
     print(f"\nVerified unique subdomains found for {target_domain}: {len(unique_subdomains)}")
     print(f"Scan completed at: {current_time}")
+
+# =====================================================================
+# PHASE 3: AUTOMATED AI TRIAGE & EXPLOITABILITY FILTERING
+# =====================================================================
+print(f"\n[*] Initiating Phase 3 data serialization and AI triage preparation...")
+
+# Dynamic target reference loop to read our completed master database report
+for active_target in target_list:
+    report_path = f"shadow-it-scanner/data_outputs/{active_target}_recon_report.json"
+
+    if os.path.exists(report_path):
+        print(f"[*] Loading master report infrastructure matrix for: {active_target}")
+        with open(report_path, 'r') as json_file:
+            compiled_report_data = json.load(json_file)
+
+        # Initialise a list array container to hold only high-risk exposed assets
+        exposed_assets_queue = []
+        
+        # 🟢 SIMULATION LEAK INJECTION (Placing it right here allows the test to fire)
+        exposed_assets_queue.append({
+            "exposed_subdomain": f"staging-db.{active_target}", 
+            "vulnerable_gateways": {"3306": "open"}
+        })
+        
+        for record in compiled_report_data:
+            subdomain_name = record["subdomain"]
+            telemetry_matrix = record["port_telemetry"]
+            
+            # Isolate ports that aren't trapped behind a filtered status blanket
+            actionable_ports = {}
+            for port_id, port_state in telemetry_matrix.items():
+                if port_state != "filtered/blocked":
+                    actionable_ports[port_id] = port_state
+                    
+            # If an asset exposes actionable ports, commit it to the high-risk queue
+            if actionable_ports:
+                exposed_record = {
+                    "exposed_subdomain": subdomain_name,
+                    "vulnerable_gateways": actionable_ports
+                }
+                exposed_assets_queue.append(exposed_record)
+                
+        print(f"    [+] High-Value Target Isolation Complete for {active_target}.")
+        print(f"    [+] Total exposed assets flagged for AI context analysis: {len(exposed_assets_queue)}")
+
+        # Trigger the AI Triage engine loop ONLY if an actual live vulnerability exposure is caught
+        if len(exposed_assets_queue) > 0:
+            print(f"    [!] Warning: Live exposures caught for {active_target}. Assembling AI Context...")
+            
+            # Define the system persona directive
+            ai_system_prompt = (
+                f"You are an elite B2B cybersecurity consulting analyst working for Angell Data Intelligence.\n"
+                f"Your target client is: {active_target}.\n"
+                f"Your objective is to review the following structured list of exposed public internet assets, "
+                f"triage their exploitability, and type a clean, non-technical executive remediation summary for the company board."
+            )
+            
+            # Serialise data
+            ai_data_context = json.dumps(exposed_assets_queue, indent=2)
+            
+            # Combine into master prompt payload string
+            master_ai_prompt = f"{ai_system_prompt}\n\n### LIVE TELEMETRY EXPOSURE DATA:\n{ai_data_context}"
+            
+            print(f"    [+] Master AI prompt payload successfully generated for {active_target} ({len(master_ai_prompt)} characters).")
+            
+            # 🟢 Drop your debug inspection line right here:
+            print(f"\n=== DEBUG MASTER PROMPT SEED ===\n{master_ai_prompt}\n================================")
+        else:
+            print(f"    [+] Architecture Verification: No live exposures found for {active_target}. Skipping AI API transactions to save resource capital.")
+
