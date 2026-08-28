@@ -265,20 +265,15 @@ for active_target in target_list:
                         {"role": "user", "content": master_ai_prompt}
                     ]
                 }
+
+                api_response = requests.post("https://api.anthropic.com", headers=api_headers, json=api_payload)
                 
-                # Execute the live cloud handshake transaction over the official Anthropic API router
-                api_response = requests.post("https://anthropic.com", headers=api_headers, json=api_payload)                
-                
-                # 🟢 STEP 1: Check the status code FIRST to prevent the crash
+                # Cleanly evaluate the response status code FIRST to prevent the crash
                 if api_response.status_code == 200:
-                    # [INDENTED 20 SPACES] Only parse JSON if the response is completely successful (200)
                     response_json = api_response.json()
+                    # 🟢 Access index 0 of the content list array to pull the text payload
                     ai_report_text = response_json["content"][0]["text"]
-                    
+    
                     print(f"\n👑 === OFFICIAL ADI EXECUTIVE SECURITY REPORT FOR {active_target} ===")
                     print(ai_report_text)
                     print("====================================================================\n")
-                else:
-                    # 🟢 STEP 2: If the key is a test placeholder (401 error), catch it safely here without crashing
-                    print(f"    [-] API Communication Fault. Server returned status code: {api_response.status_code}")
-                    print(f"    [-] Diagnostic Log: {api_response.text}")
