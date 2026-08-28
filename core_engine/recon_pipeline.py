@@ -255,25 +255,88 @@ for active_target in target_list:
                     "x-api-key": api_key,
                     "anthropic-version": "2023-06-01",
                     "content-type": "application/json"
-                }
+}
                 
                 api_payload = {
-                    "model": "claude-3-5-sonnet-20240620",
+                    "model": "claude-sonnet-5",
                     "max_tokens": 1000,
-                    "temperature": 0.2,
                     "messages": [
                         {"role": "user", "content": master_ai_prompt}
                     ]
                 }
 
-                api_response = requests.post("https://api.anthropic.com", headers=api_headers, json=api_payload)
-                
-                # Cleanly evaluate the response status code FIRST to prevent the crash
-                if api_response.status_code == 200:
-                    response_json = api_response.json()
-                    # 🟢 Access index 0 of the content list array to pull the text payload
-                    ai_report_text = response_json["content"][0]["text"]
-    
-                    print(f"\n👑 === OFFICIAL ADI EXECUTIVE SECURITY REPORT FOR {active_target} ===")
-                    print(ai_report_text)
-                    print("====================================================================\n")
+                try:
+                    api_response = requests.post(
+                        "https://api.anthropic.com/v1/messages",
+                        headers=api_headers,
+                        json=api_payload,
+                        timeout=30
+                    )
+                    
+                    print(f"    [*] API Response Status: {api_response.status_code}")
+                    
+                    if api_response.status_code == 200:
+                        response_json = api_response.json()
+                        ai_report_text = response_json["content"][0]["text"]
+
+                        print(f"\n👑 === OFFICIAL ANGELL DATA INTELLIGENCE EXECUTIVE SECURITY REPORT FOR {active_target} ===")
+                        print(ai_report_text)
+                        print("====================================================================\n")
+                        
+                        # Define a clean, unique file path destination for the PDF artifact
+                        pdf_filepath = f"shadow-it-scanner/data_outputs/{active_target}_executive_risk_report.pdf"
+                        print(f"    [*] Compiling white-labeled corporate PDF report at: {pdf_filepath}")
+                        
+                        # Instantiate a clean ReportLab Simple Document blueprint wrapper
+                        pdf_document = SimpleDocTemplate(pdf_filepath, pagesize=letter)
+                        
+                        # Fetch standard text formatting stylesheets
+                        styles = getSampleStyleSheet()
+                        
+                        # Construct a custom, professional corporate style layout hierarchy
+                        title_style = ParagraphStyle(
+                            'ADITitle',
+                            parent=styles['Heading1'],
+                            fontSize=24,
+                            leading=28,
+                            textColor='#1A365D',
+                            spaceAfter=20
+                        )
+                        body_style = ParagraphStyle(
+                            'ADIBody',
+                            parent=styles['Normal'],
+                            fontSize=11,
+                            leading=16,
+                            textColor='#2D3748',
+                            spaceAfter=12
+                        )
+                        
+                        # Construct a list array container to hold our dynamic document Flowable pieces
+                        pdf_story = []
+                        
+                        # Inject the master branding title header paragraph block
+                        pdf_story.append(Paragraph(f"Angell Data Intelligence - Executive Risk Profile", title_style))
+                        pdf_story.append(Paragraph(f"Target Infrastructure Audit: <b>{active_target}</b>", styles['Heading3']))
+                        pdf_story.append(Paragraph(f"Scan Generation Ledger (UTC): {current_time}", styles['Normal']))
+                        pdf_story.append(Spacer(1, 20))
+                        
+                        # Parse Claude's raw report text block and split it cleanly by line breaks
+                        raw_lines = ai_report_text.split('\n')
+                        for line in raw_lines:
+                            clean_line = line.strip()
+                            if clean_line:
+                                # Package every line block into a dynamic Flowable paragraph element
+                                pdf_story.append(Paragraph(clean_line, body_style))
+                                
+                        # Command the ReportLab engine motor to cleanly compile the layout onto the hard drive
+                        pdf_document.build(pdf_story)
+                        print(f"    [+] PDF Build Complete. Security asset written to disk.")
+                        
+                    else:
+                        print(f"    [-] API Error {api_response.status_code}")
+                        print(f"    [-] Response: {api_response.text}")
+
+                except requests.exceptions.RequestException as e:
+                    print(f"    [-] Network Error: {e}")
+                except Exception as e:
+                    print(f"    [-] Unexpected Error: {e}")
