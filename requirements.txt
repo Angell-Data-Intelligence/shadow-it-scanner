@@ -1,0 +1,6 @@
+requests
+pandas
+reportlab
+python-dotenv
+flask
+gunicorn
