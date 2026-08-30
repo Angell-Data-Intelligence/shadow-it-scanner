@@ -13,15 +13,15 @@ def scan():
     limits = {'scout': 20, 'radar': 100, 'sentinel': 500}
     limit = limits.get(tier, 20)
    
-    cmd = f"python3 /home/sully/shadow-it-scanner/recon_pipeline.py --target {domain} --limit {limit} --tier {tier}"
+    cmd = f"python3 /app/recon_pipeline.py --target {domain} --limit {limit} --tier {tier}"
     result = subprocess.run(cmd, shell=True, capture_output=True)
    
-    pdf_path = f"/home/sully/shadow-it-scanner/data_outputs/{domain}_executive_risk_report.pdf"
+    pdf_path = f"/app/data_outputs/{domain}_executive_risk_report.pdf"
    
     if os.path.exists(pdf_path):
         return send_file(pdf_path, mimetype='application/pdf')
     else:
-        return jsonify({'error': 'Scan failed'}), 500
+        return jsonify({'error': 'Scan failed', 'debug': result.stderr.decode()}), 500
 
 @app.route('/health', methods=['GET'])
 def health():
