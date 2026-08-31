@@ -231,7 +231,7 @@ for target_domain in target_list:
 print(f"\n[*] Initiating Phase 3 data serialsation and AI triage preparation...")
 
 for active_target in target_list:
-    report_path = os.path.join(OUTPUT_DIR, f"{active_target}_recon_report.json"
+    report_path = os.path.join(OUTPUT_DIR, f"{active_target}_recon_report.json")
     # report_path = f"shadow-it-scanner/data_outputs/{active_target}_recon_report.json"
 
     if os.path.exists(report_path):
