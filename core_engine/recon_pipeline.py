@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 import argparse
+import shutil
 from datetime import datetime, timezone
 import requests
 from dotenv import load_dotenv
@@ -154,7 +155,10 @@ for target_domain in target_list:
         print(f"Cache Miss: Initiating live network scan for {target_domain}...")
         
         # In-memory execution and telemetry capture for subdomain discovery using Subfinder tool
-        commands_args = ['subfinder', '-d', target_domain, '-silent']
+        subfinder_path = shutil.which("subfinder")
+        if not subfinder_path:
+            subfinder_path = "/app/.heroku/bin/subfinder"
+        commands_args = [subfinder_path, '-d', target_domain, '-silent']
         scan_result = subprocess.run(commands_args, capture_output=True, text=True)
         subdomains = scan_result.stdout.splitlines()
         cleaned_subdomains = [subdomain.strip() for subdomain in subdomains if subdomain.strip()]
