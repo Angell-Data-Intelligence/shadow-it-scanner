@@ -115,8 +115,10 @@ else:
 # Ensure the data storage directory exists safely before execution
 # os.makedirs('shadow-it-scanner/data_outputs', exist_ok=True)
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUTPUT_DIR = os.path.join(BASE_DIR, "data_outputs")
+raw_base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = str(raw_base).strip()
+raw_output = os.path.join(BASE_DIR, "data_outputs")
+OUTPUT_DIR = str(raw_output).strip()
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # =====================================================================
@@ -340,7 +342,7 @@ for active_target in target_list:
                         print("====================================================================\n")
                         
                         # Define a clean, unique file path destination for the PDF artifact
-                        pdf_filepath = os.path.join(OUTPUT_DIR, f"{active_target}_executive_risk_report.pdf")
+                        pdf_filepath = str(os.path.join(OUTPUT_DIR, f"{active_target}_executive_risk_report.pdf")).strip()
                         # pdf_filepath = f"shadow-it-scanner/data_outputs/{active_target}_executive_risk_report.pdf"
                         print(f"    [*] Compiling white-labeled corporate PDF report at: {pdf_filepath}")
                         
