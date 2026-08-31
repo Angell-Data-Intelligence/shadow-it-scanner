@@ -356,7 +356,7 @@ for active_target in target_list:
                             parent=styles['Heading1'],
                             fontSize=24,
                             leading=28,
-                            textColor='#1A365D',
+                            textColor=colors.HexColor('#1A365D'),
                             spaceAfter=20
                         )
                         body_style = ParagraphStyle(
@@ -364,7 +364,7 @@ for active_target in target_list:
                             parent=styles['Normal'],
                             fontSize=11,
                             leading=16,
-                            textColor='#2D3748',
+                            textColor=colors.HexColor('#2D3748'),
                             spaceAfter=12
                         )
                         
