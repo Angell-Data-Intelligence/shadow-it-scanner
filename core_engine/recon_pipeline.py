@@ -111,7 +111,11 @@ else:
     target_list = [target_input]
 
 # Ensure the data storage directory exists safely before execution
-os.makedirs('shadow-it-scanner/data_outputs', exist_ok=True)
+# os.makedirs('shadow-it-scanner/data_outputs', exist_ok=True)
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_DIR = os.path.join(BASE_DIR, "data_outputs")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # =====================================================================
 # MACRO EXECUTION LOOP: ITERATING THROUGHOUT THE INGESTED TARGET MATRIX
@@ -120,8 +124,9 @@ for target_domain in target_list:
     print(f"\n[►] Commencing infrastructure audit for target: {target_domain}")
     
     # Calculate the target file path dynamically for the current domain in the loop
-    output_filepath = f"shadow-it-scanner/data_outputs/{target_domain}_subdomains.json"
-
+    # output_filepath = f"shadow-it-scanner/data_outputs/{target_domain}_subdomains.json"
+    
+    output_filepath = os.path.join(OUTPUT_DIR, f"{target_domain}_subdomain.json")
     # Initialise a conditional control flag to determine our extraction route
     needs_live_scan = True
 
@@ -211,7 +216,8 @@ for target_domain in target_list:
         print(f"    [+] Parsed Telemetry for {loop}: {host_telemetry}")
         print("-" * 60)
 
-    report_filepath = f"shadow-it-scanner/data_outputs/{target_domain}_recon_report.json"
+    # report_filepath = f"shadow-it-scanner/data_outputs/{target_domain}_recon_report.json"
+    report_filepath = os.path.join(OUTPUT_DIR, f"{target_domain}_recon_report.json" )
     with open(report_filepath, 'w') as json_file:
         json.dump(recon_report, json_file, indent=4)
 
@@ -225,7 +231,8 @@ for target_domain in target_list:
 print(f"\n[*] Initiating Phase 3 data serialsation and AI triage preparation...")
 
 for active_target in target_list:
-    report_path = f"shadow-it-scanner/data_outputs/{active_target}_recon_report.json"
+    report_path = os.path.join(OUTPUT_DIR, f"{active_target}_recon_report.json"
+    # report_path = f"shadow-it-scanner/data_outputs/{active_target}_recon_report.json"
 
     if os.path.exists(report_path):
         print(f"[*] Loading master report infrastructure matrix for: {active_target}")
@@ -315,7 +322,8 @@ for active_target in target_list:
                         print("====================================================================\n")
                         
                         # Define a clean, unique file path destination for the PDF artifact
-                        pdf_filepath = f"shadow-it-scanner/data_outputs/{active_target}_executive_risk_report.pdf"
+                        pdf_filepath = os.path.join(OUTPUT_DIR), f"{active_target}_executive_risk_report.pdf"
+                        # pdf_filepath = f"shadow-it-scanner/data_outputs/{active_target}_executive_risk_report.pdf"
                         print(f"    [*] Compiling white-labeled corporate PDF report at: {pdf_filepath}")
                         
                         # Instantiate a clean ReportLab Simple Document blueprint wrapper

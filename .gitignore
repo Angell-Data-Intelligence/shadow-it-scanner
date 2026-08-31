@@ -1,5 +1,8 @@
-shadow-it-scanner/data_outputs/
+shadow-it-scanner
+data_outputs/
+core_engine/shadow-it-scanner/
 subdomains.txt
 *.json
+*.pdf
 targets.txt
 .env
