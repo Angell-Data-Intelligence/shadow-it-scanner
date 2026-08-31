@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
 
 load_dotenv()
 
@@ -189,32 +190,6 @@ for target_domain in target_list:
         # Dynamic loading and file output phase for enterprise telemetry and reporting
         with open(output_filepath, 'w') as json_file:
             json.dump(scan_payload, json_file, indent=4)
-    # # Trigger the active extraction layer if a Cache Miss or Cache Stale status is caught
-    # if needs_live_scan:
-    #     print(f"Cache Miss: Initiating live network scan for {target_domain}...")
-        
-    #     # In-memory execution and telemetry capture for subdomain discovery using Subfinder tool
-    #     subfinder_path = shutil.which("subfinder")
-    #     if not subfinder_path:
-    #         subfinder_path = "/app/.heroku/bin/subfinder"
-    #     commands_args = [subfinder_path, '-d', target_domain, '-silent']
-    #     scan_result = subprocess.run(commands_args, capture_output=True, text=True)
-    #     subdomains = scan_result.stdout.splitlines()
-    #     cleaned_subdomains = [subdomain.strip() for subdomain in subdomains if subdomain.strip()]
-    #     unique_subdomains = list(set(cleaned_subdomains))
-
-    #     # Capture the operational execution timestamp using global universal time
-    #     current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-    #     scan_payload = {
-    #         "target_domain": target_domain,
-    #         "scan_time": current_time,
-    #         "total_subdomains": len(unique_subdomains),
-    #         "unique_subdomains": unique_subdomains
-    #     }
-
-    #     # Dynamic loading and file output phase for enterprise telemetry and reporting
-    #     with open(output_filepath, 'w') as json_file:
-    #         json.dump(scan_payload, json_file, indent=4)
 
     # =====================================================================
     # Phase 2: Detailed Infrastructure Recon (Port Telemetry)
