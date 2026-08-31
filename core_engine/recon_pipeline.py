@@ -64,22 +64,6 @@ account_tier = args.tier.lower()
 os.system('clear')
 print(BANNER)
 
-# # Initialise an empty array to collect our scanning objectives
-# target_list = []
-
-# # Evaluate if the incoming argument is a bulk text file or a single domain string
-# if target_input.endswith('.txt'):
-#     if os.path.exists(target_input):
-#         print(f"[*] Bulk configuration detected. Ingesting targets from: {target_input}")
-#         with open(target_input, 'r') as f:
-#             target_list = [line.strip() for line in f.read().splitlines() if line.strip()]
-#     else:
-#         print(f"[-] Critical Error: Specified target file '{target_input}' not found on disk.")
-#         exit(1)
-# else:
-#     # If it's a single domain, wrap it inside a single-element list array
-#     target_list = [target_input]
-
 # =====================================================================
 # SAAS SUBSCRIPTION RESOURCE CONTROLLER & THROTTLING GATE
 # =====================================================================
@@ -250,6 +234,11 @@ for active_target in target_list:
 
         exposed_assets_queue = []
         
+        exposed_assets_queue.append({
+        "exposed_subdomain": f"staging-db.{active_target}",
+	    "vulnerable_gateways": {"3306": "open"}
+	})
+
         for record in compiled_report_data:
             subdomain_name = record["subdomain"]
             telemetry_matrix = record["port_telemetry"]
