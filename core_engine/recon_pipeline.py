@@ -260,11 +260,6 @@ for active_target in target_list:
             compiled_report_data = json.load(json_file)
 
         exposed_assets_queue = []
-        
-    #     exposed_assets_queue.append({
-    #     "exposed_subdomain": f"staging-db.{active_target}",
-	#     "vulnerable_gateways": {"3306": "open"}
-	# })
 
         for record in compiled_report_data:
             subdomain_name = record["subdomain"]
@@ -278,7 +273,7 @@ for active_target in target_list:
             if actionable_ports:
                 exposed_record = {
                     "exposed_subdomain": subdomain_name,
-                    "vulnerable_gateways": actionable_ports
+                    "vulnerable_gateways": actionable_ports if actionable_ports else {"status": "all monitored ports secure/closed"}
                 }
                 exposed_assets_queue.append(exposed_record)
                 
@@ -316,7 +311,7 @@ for active_target in target_list:
 }
                 
                 api_payload = {
-                    "model": "claude-sonnet-5",
+                    "model": "claude-sonnet-3-5-sonnet-latest",
                     "max_tokens": 1000,
                     "messages": [
                         {"role": "user", "content": master_ai_prompt}
@@ -335,7 +330,7 @@ for active_target in target_list:
                     
                     if api_response.status_code == 200:
                         response_json = api_response.json()
-                        ai_report_text = response_json["content"][0]["text"]
+                        ai_report_text = response_json["content"]["text"] if isinstance(response_json["content"], dict) else response_json["content"][0]["text"]
 
                         print(f"\n👑 === OFFICIAL ANGELL DATA INTELLIGENCE EXECUTIVE SECURITY REPORT FOR {active_target} ===")
                         print(ai_report_text)
