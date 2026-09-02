@@ -16,8 +16,19 @@ def scan():
     limits = {'scout': 20, 'radar': 100, 'sentinel': 500}
     limit = limits.get(tier, 20)
    
-    # ✅ FIX 1: Use relative pathing to target core_engine folder
-    # ✅ FIX 2: Switched shell=True string to a secure, injection-proof list array
+    # Calculate directory mapping contexts cleanly
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+   
+    # 🟢 FORCE CACHE CLEAR: Destroy hidden stale artifacts before the script executes
+    old_json = os.path.join(base_dir, "data_outputs", f"{domain}_recon_report.json")
+    old_pdf = os.path.join(base_dir, "data_outputs", f"{domain}_executive_risk_report.pdf")
+   
+    if os.path.exists(old_json):
+        os.remove(old_json)
+    if os.path.exists(old_pdf):
+        os.remove(old_pdf)
+   
+    # Switched shell=True string to a secure, injection-proof list array
     cmd = [
         "python3",
         "core_engine/recon_pipeline.py",
@@ -29,8 +40,7 @@ def scan():
     # Run the pipeline relative to the project root directory
     result = subprocess.run(cmd, capture_output=True, text=True)
    
-    # ✅ FIX 3: Dynamic path calculation for data_outputs folder
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # Target location definition for the clean PDF output
     pdf_path = os.path.join(base_dir, "data_outputs", f"{domain}_executive_risk_report.pdf")
    
     if os.path.exists(pdf_path):
