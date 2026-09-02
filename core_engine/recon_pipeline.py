@@ -271,10 +271,10 @@ for active_target in target_list:
                 if port_state != "filtered/blocked":
                     actionable_ports[port_id] = port_state
                     
-            if actionable_ports:
+            if actionable_ports or subdomain_name == active_target:
                 exposed_record = {
                     "exposed_subdomain": subdomain_name,
-                    "vulnerable_gateways": actionable_ports
+                    "vulnerable_gateways": actionable_ports if actionable_ports else {"status": "all monitored ports secure/closed"}
                 }
                 exposed_assets_queue.append(exposed_record)
                 
@@ -312,7 +312,7 @@ for active_target in target_list:
 }
                 
                 api_payload = {
-                    "model": "claude-sonnet-5",
+                    "model": "claude-3-5-sonnet-20240620",
                     "max_tokens": 1000,
                     "messages": [
                         {"role": "user", "content": master_ai_prompt}
