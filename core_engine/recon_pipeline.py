@@ -152,6 +152,7 @@ for target_domain in target_list:
             needs_live_scan = False
         else:
             print(f"Cache Stale: Existing data is {cache_age_days} days old. Expiring cache layer...")
+    
     # Trigger the active extraction layer if a Cache Miss or Cache Stale status is caught
     if needs_live_scan:
         print(f"Cache Miss: Initiating live network scan for {target_domain}...")
@@ -260,11 +261,6 @@ for active_target in target_list:
             compiled_report_data = json.load(json_file)
 
         exposed_assets_queue = []
-        
-        exposed_assets_queue.append({
-        "exposed_subdomain": f"staging-db.{active_target}",
-	    "vulnerable_gateways": {"3306": "open"}
-	})
 
         for record in compiled_report_data:
             subdomain_name = record["subdomain"]
