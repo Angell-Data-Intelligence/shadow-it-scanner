@@ -261,10 +261,10 @@ for active_target in target_list:
 
         exposed_assets_queue = []
         
-        exposed_assets_queue.append({
-        "exposed_subdomain": f"staging-db.{active_target}",
-	    "vulnerable_gateways": {"3306": "open"}
-	})
+    #     exposed_assets_queue.append({
+    #     "exposed_subdomain": f"staging-db.{active_target}",
+	#     "vulnerable_gateways": {"3306": "open"}
+	# })
 
         for record in compiled_report_data:
             subdomain_name = record["subdomain"]
