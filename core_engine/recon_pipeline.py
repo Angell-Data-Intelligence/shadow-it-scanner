@@ -312,7 +312,7 @@ for active_target in target_list:
 }
                 
                 api_payload = {
-                    "model": "claude-3-5-sonnet-20240620",
+                    "model": "claude-3-5-sonnet-latest",
                     "max_tokens": 1000,
                     "messages": [
                         {"role": "user", "content": master_ai_prompt}
