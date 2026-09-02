@@ -34,7 +34,8 @@ def scan():
         "core_engine/recon_pipeline.py",
         "--target", str(domain),
         "--limit", str(limit),
-        "--tier", str(tier)
+        "--tier", str(tier),
+        "--force"
     ]
    
     # Run the pipeline relative to the project root directory
