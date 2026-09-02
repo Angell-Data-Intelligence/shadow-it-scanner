@@ -337,7 +337,8 @@ for active_target in target_list:
                         print("====================================================================\n")
                         
                         # Define a clean, unique file path destination for the PDF artifact
-                        pdf_filepath = f"/app/data_outputs/{active_target}_executive_risk_report.pdf"
+                        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                        pdf_filepath = os.path.join(base_dir, "data_outputs" f"{active_target}_executive_risk_report.pdf"
                         # pdf_filepath = f"shadow-it-scanner/data_outputs/{active_target}_executive_risk_report.pdf"
                         print(f"    [*] Compiling white-labeled corporate PDF report at: {pdf_filepath}")
                         
