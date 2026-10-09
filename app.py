@@ -47,6 +47,8 @@ def scan():
     if os.path.exists(pdf_path):
         return send_file(pdf_path, mimetype='application/pdf')
     else:
+        # Print the exact error/stderr to Heroku logs so you can see it via `heroku logs --tail`
+        print(f"SUBPROCESS FAILED:\nSTDOUT: {result.stdout}\nSTDERR: {result.stderr}")
         return jsonify({
             'error': 'Scan failed',
             'stdout': result.stdout,
