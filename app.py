@@ -43,8 +43,8 @@ def scan():
     result = subprocess.run(cmd, capture_output=True, text=True)
    
     # Target location definition for the clean PDF output
-    pdf_path = os.path.join(base_dir, "data_outputs", f"{domain}_executive_risk_report.pdf")
-   
+    pdf_path = os.path.join(base_dir, "core_engine", "data_outputs", f"{domain}_executive_risk_report.pdf")
+    
     if os.path.exists(pdf_path):
         return send_file(pdf_path, mimetype='application/pdf')
     else:
