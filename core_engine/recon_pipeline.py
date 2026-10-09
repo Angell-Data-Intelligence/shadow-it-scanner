@@ -3,6 +3,7 @@ import subprocess
 import json
 import argparse
 import shutil
+import html
 from datetime import datetime, timezone
 import requests
 from dotenv import load_dotenv
@@ -242,11 +243,11 @@ for active_target in target_list:
         # Now this will always evaluate to True and generate your PDF report!
         if len(exposed_assets_queue) > 0:
             ai_system_prompt = (
-                f"You are an elite B2B cybersecurity consulting analyst working for Angell Data Intelligence.\n"
-                f"Your target client is: {active_target}.\n"
-                f"Your objective is to review the following structured list of exposed public internet assets, "
-                f"triage their security posture (noting if everything is secure and properly locked down), "
-                f"and write a clean, non-technical executive summary for the company board."
+                f"You are a professional IT infrastructure compliance and network availability auditor.\n"
+                f"Your target client organization is: {active_target}.\n"
+                f"Your objective is to review the inventory of authorized corporate domain endpoints, "
+                f"summarize their standard network connectivity posture (confirming whether ports are securely managed or closed), "
+                f"and write a high-level executive summary for IT asset management and compliance reporting."
             )
             # ... rest of your AI and PDF compilation code ...
             ai_data_context = json.dumps(exposed_assets_queue, indent=2)
