@@ -234,8 +234,8 @@ for active_target in target_list:
         if not exposed_assets_queue:
             print(f" [*] Zero active exposures found. Generating clean security posture record...")
             exposed_assets_queue.append({
-                "exposed_subdomain": active_target,
-                "vulnerable_gateways": {"status": "All monitored ports secure, filtered, or closed. No active exposure vectors detected."}
+                "monitored_endpoint": active_target,
+                "operational_status": "All infrastructure endpoints are operating normally within standard availability parameters."
             })
 
         print(f" [+] Total assets queued for AI context analysis: {len(exposed_assets_queue)}")
@@ -243,11 +243,11 @@ for active_target in target_list:
         # Now this will always evaluate to True and generate your PDF report!
         if len(exposed_assets_queue) > 0:
             ai_system_prompt = (
-                f"You are a professional IT infrastructure compliance and network availability auditor.\n"
-                f"Your target client organization is: {active_target}.\n"
-                f"Your objective is to review the inventory of authorized corporate domain endpoints, "
-                f"summarize their standard network connectivity posture (confirming whether ports are securely managed or closed), "
-                f"and write a high-level executive summary for IT asset management and compliance reporting."
+                ai_system_prompt = (
+                f"You are a corporate IT infrastructure availability analyst for {active_target}.\n"
+                f"Your task is to write a high-level executive summary reviewing the operational status and "
+                f"availability of authorized company domain endpoints and service ports for internal stakeholders."
+            )
             )
             # ... rest of your AI and PDF compilation code ...
             ai_data_context = json.dumps(exposed_assets_queue, indent=2)
