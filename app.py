@@ -29,13 +29,13 @@ def scan():
         os.remove(old_pdf)
    
     # Switched shell=True string to a secure, injection-proof list array
+    # Switched shell=True string to a secure, injection-proof list array
     cmd = [
         "python3",
         "core_engine/recon_pipeline.py",
         "--target", str(domain),
         "--limit", str(limit),
-        "--tier", str(tier),
-        "--force"
+        "--tier", str(tier)
     ]
    
     # Run the pipeline relative to the project root directory
