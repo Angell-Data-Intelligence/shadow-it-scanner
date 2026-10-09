@@ -229,8 +229,7 @@ for active_target in target_list:
 
         print(f" [+] High-Value Target Isolation Complete for {active_target}.")
         
-        # 🟢 ADD THIS FALLBACK BLOCK HERE:
-        # If no vulnerabilities/open ports are found, create a "Clean Bill of Health" record
+        # If no vulnerabilities/open ports are found, create a clean status record
         if not exposed_assets_queue:
             print(f" [*] Zero active exposures found. Generating clean security posture record...")
             exposed_assets_queue.append({
@@ -240,16 +239,13 @@ for active_target in target_list:
 
         print(f" [+] Total assets queued for AI context analysis: {len(exposed_assets_queue)}")
 
-        # Now this will always evaluate to True and generate your PDF report!
         if len(exposed_assets_queue) > 0:
             ai_system_prompt = (
-                ai_system_prompt = (
-                f"You are a corporate IT infrastructure availability analyst for {active_target}.\n"
+                f"You are a corporate IT infrastructure availability analyst for {active_target}. "
                 f"Your task is to write a high-level executive summary reviewing the operational status and "
                 f"availability of authorized company domain endpoints and service ports for internal stakeholders."
             )
-            )
-            # ... rest of your AI and PDF compilation code ...
+            
             ai_data_context = json.dumps(exposed_assets_queue, indent=2)
             master_ai_prompt = f"{ai_system_prompt}\n\n### LIVE TELEMETRY EXPOSURE DATA:\n{ai_data_context}"
 
