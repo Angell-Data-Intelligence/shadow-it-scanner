@@ -280,7 +280,13 @@ for active_target in target_list:
                 print(f" [*] API Response Status: {api_response.status_code}")
                 if api_response.status_code == 200:
                     response_json = api_response.json()
-                    ai_report_text = response_json["content"][0]["text"]
+                    
+                    # Safe extraction for response content
+                    content_blocks = response_json.get("content", [])
+                    if content_blocks and "text" in content_blocks[0]:
+                        ai_report_text = content_blocks[0]["text"]
+                    else:
+                        ai_report_text = str(response_json) # Fallback string if structure differs
 
                     print(f"\n👑 === OFFICIAL ANGELL DATA INTELLIGENCE EXECUTIVE SECURITY REPORT FOR {active_target} ===")
                     print(ai_report_text)
