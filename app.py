@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 import subprocess
 import os
+import html
 
 app = Flask(__name__)
 
