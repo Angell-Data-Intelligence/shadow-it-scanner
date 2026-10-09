@@ -263,7 +263,7 @@ for active_target in target_list:
                 "content-type": "application/json"
             }
             api_payload = {
-                "model": "claude-3-5-sonnet-latest", # Fixed model name typo
+                "model": "claude-3-5-sonnet-20241022", # Fixed model name typo
                 "max_tokens": 1000,
                 "messages": [
                     {"role": "user", "content": master_ai_prompt}
