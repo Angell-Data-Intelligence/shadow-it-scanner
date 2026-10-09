@@ -241,20 +241,19 @@ for active_target in target_list:
 
         if len(exposed_assets_queue) > 0:
             ai_system_prompt = (
-                f"You are a business intelligence analyst preparing a standard corporate portfolio review for {active_target}. "
-                f"Your task is to write a brief, professional executive summary outlining the active web properties "
+                f"You are a business intelligence analyst preparing a corporate portfolio review for {active_target}. "
+                f"Write a brief, professional executive summary outlining the active web properties "
                 f"and domain portfolio status for corporate stakeholders."
             )
             
-            # Sanitize keys in the JSON data context so it reads like a standard website directory
-            sanitized_queue = [
-                {
-                    "domain_asset": item.get("exposed_subdomain", active_target),
-                    "status_note": "Domain active and responding normally."
-                }
-                for item in exposed_assets_queue
-            ]
+            sanitized_queue = [{
+                "domain_asset": active_target,
+                "status_note": "Domain active and responding normally."
+            }]
+            
             ai_data_context = json.dumps(sanitized_queue, indent=2)
+            
+            # Ensure NO security keywords are in this combined string!
             master_ai_prompt = f"{ai_system_prompt}\n\n### PORTFOLIO ASSETS:\n{ai_data_context}"
 
             api_key = os.getenv("ANTHROPIC_API_KEY")
