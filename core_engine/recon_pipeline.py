@@ -211,11 +211,14 @@ for active_target in target_list:
             compiled_report_data = json.load(json_file)
 
         exposed_assets_queue = []
+
         for record in compiled_report_data:
             subdomain_name = record["subdomain"]
             telemetry_matrix = record["port_telemetry"]
-            actionable_ports = {p_id: p_state for p_id, p_state in telemetry_matrix.items() if p_state != "filtered/blocked"}
-            
+            actionable_ports = {}
+            for port_id, port_state in telemetry_matrix.items():
+                if port_state != "filtered/blocked":
+                    actionable_ports[port_id] = port_state
             if actionable_ports:
                 exposed_record = {
                     "exposed_subdomain": subdomain_name,
@@ -223,14 +226,29 @@ for active_target in target_list:
                 }
                 exposed_assets_queue.append(exposed_record)
 
-        if exposed_assets_queue:
-            print(f" [!] Warning: Live exposures caught for {active_target}. Assembling AI Context...")
+        print(f" [+] High-Value Target Isolation Complete for {active_target}.")
+        
+        # 🟢 ADD THIS FALLBACK BLOCK HERE:
+        # If no vulnerabilities/open ports are found, create a "Clean Bill of Health" record
+        if not exposed_assets_queue:
+            print(f" [*] Zero active exposures found. Generating clean security posture record...")
+            exposed_assets_queue.append({
+                "exposed_subdomain": active_target,
+                "vulnerable_gateways": {"status": "All monitored ports secure, filtered, or closed. No active exposure vectors detected."}
+            })
+
+        print(f" [+] Total assets queued for AI context analysis: {len(exposed_assets_queue)}")
+
+        # Now this will always evaluate to True and generate your PDF report!
+        if len(exposed_assets_queue) > 0:
             ai_system_prompt = (
                 f"You are an elite B2B cybersecurity consulting analyst working for Angell Data Intelligence.\n"
                 f"Your target client is: {active_target}.\n"
                 f"Your objective is to review the following structured list of exposed public internet assets, "
-                f"triage their exploitability, and type a clean, non-technical executive remediation summary for the company board."
+                f"triage their security posture (noting if everything is secure and properly locked down), "
+                f"and write a clean, non-technical executive summary for the company board."
             )
+            # ... rest of your AI and PDF compilation code ...
             ai_data_context = json.dumps(exposed_assets_queue, indent=2)
             master_ai_prompt = f"{ai_system_prompt}\n\n### LIVE TELEMETRY EXPOSURE DATA:\n{ai_data_context}"
 
