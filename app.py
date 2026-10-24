@@ -56,9 +56,10 @@ def scan():
             'debug': result.stderr
         }), 500
 
-@app.route('/report', methods=['POST'])
+@app.route('/report', methods=['GET', 'POST'])
 def report():
-    data = request.json or {}
+    # Support both GET query args and POST json payloads
+    data = request.args if request.method == 'GET' else (request.json or {})
     domain = data.get('domain')
    
     if not domain:
