@@ -4,7 +4,5 @@ reportlab
 python-dotenv
 flask
 gunicorn
- 
- 
- 
- 
+redis
+rq
