@@ -58,6 +58,7 @@ def scan():
 @app.route('/download', methods=['GET', 'POST'])
 def download():
     domain = request.args.get('domain') or (request.json or {}).get('domain')
+    email = request.args.get('email') or (request.json or {}).get('email')
     
     if not domain:
         return jsonify({'error': 'Missing required parameter: domain'}), 400
