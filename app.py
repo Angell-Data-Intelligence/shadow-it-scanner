@@ -51,5 +51,27 @@ def scan():
             'debug': result.stderr
         }), 500
 
+
+# =====================================================================
+# DOWNLOAD ROUTE
+# =====================================================================
+@app.route('/download', methods=['POST'])
+def download():
+    data = request.json or {}
+    domain = data.get('domain')
+    
+    if not domain:
+        return jsonify({'error': 'Missing required parameter: domain'}), 400
+        
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    pdf_filename = f"{domain}_executive_risk_report.pdf"
+    pdf_path = os.path.join(base_dir, "core_engine", "data_outputs", pdf_filename)
+    
+    if os.path.exists(pdf_path):
+        return send_file(pdf_path, mimetype='application/pdf', as_attachment=True, download_name=pdf_filename)
+    else:
+        return jsonify({'error': f'Report PDF for {domain} not found. Please run a scan first.'}), 404
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
