@@ -57,18 +57,31 @@ def scan():
 # =====================================================================
 @app.route('/download', methods=['GET', 'POST'])
 def download():
-    # Support both query parameters (GET) and JSON body (POST)
     domain = request.args.get('domain') or (request.json or {}).get('domain')
     
     if not domain:
         return jsonify({'error': 'Missing required parameter: domain'}), 400
         
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    pdf_filename = f"{domain}_executive_risk_report.pdf"
-    pdf_path = os.path.join(base_dir, "core_engine", "data_outputs", pdf_filename)
     
-    if os.path.exists(pdf_path):
-        return send_file(pdf_path, mimetype='application/pdf', as_attachment=True, download_name=pdf_filename)
+    # Check for both the dynamic domain report and the standard production scan output
+    possible_filenames = [
+        f"{domain}_executive_risk_report.pdf",
+        "production_scan.pdf"
+    ]
+    
+    pdf_path = None
+    matched_filename = None
+    
+    for filename in possible_filenames:
+        test_path = os.path.join(base_dir, "core_engine", "data_outputs", filename)
+        if os.path.exists(test_path):
+            pdf_path = test_path
+            matched_filename = filename
+            break
+            
+    if pdf_path and matched_filename:
+        return send_file(pdf_path, mimetype='application/pdf', as_attachment=True, download_name=matched_filename)
     else:
         return jsonify({'error': f'Report PDF for {domain} not found. Please run a scan first.'}), 404
 
