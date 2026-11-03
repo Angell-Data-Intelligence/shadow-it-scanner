@@ -55,6 +55,8 @@ def scan():
 # =====================================================================
 # DOWNLOAD ROUTE
 # =====================================================================
+import base64
+
 @app.route('/download', methods=['GET', 'POST'])
 def download():
     domain = request.args.get('domain') or (request.json or {}).get('domain')
@@ -65,7 +67,6 @@ def download():
         
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # Check for both the dynamic domain report and the standard production scan output
     possible_filenames = [
         f"{domain}_executive_risk_report.pdf",
         "production_scan.pdf"
@@ -82,7 +83,15 @@ def download():
             break
             
     if pdf_path and matched_filename:
-        return send_file(pdf_path, mimetype='application/pdf', as_attachment=True, download_name=matched_filename)
+        # Read the binary PDF file and encode it as a base64 string for Retool
+        with open(pdf_path, "rb") as f:
+            encoded_pdf = base64.b64encode(f.read()).decode('utf-8')
+            
+        return jsonify({
+            'data': encoded_pdf,
+            'contentType': 'application/pdf',
+            'filename': matched_filename
+        }), 200
     else:
         return jsonify({'error': f'Report PDF for {domain} not found. Please run a scan first.'}), 404
 
