@@ -60,7 +60,14 @@ import base64
 @app.route('/download', methods=['GET', 'POST'])
 def download():
     domain = request.args.get('domain') or (request.json or {}).get('domain')
-    email = request.args.get('email') or (request.json or {}).get('email')
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    outputs_dir = os.path.join(base_dir, "core_engine", "data_outputs")
+    
+    # DEBUG: Print all files currently sitting in your data outputs folder
+    if os.path.exists(outputs_dir):
+        print("Files in data_outputs:", os.listdir(outputs_dir))
+    else:
+        print("Outputs directory does not exist at:", outputs_dir)
     
     if not domain:
         return jsonify({'error': 'Missing required parameter: domain'}), 400
