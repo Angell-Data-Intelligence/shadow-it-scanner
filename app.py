@@ -60,6 +60,10 @@ import base64
 @app.route('/download', methods=['GET', 'POST'])
 def download():
     domain = request.args.get('domain') or (request.json or {}).get('domain')
+    
+    if not domain:
+        return jsonify({'error': 'Missing required parameter: domain'}), 400
+        
     base_dir = os.path.dirname(os.path.abspath(__file__))
     outputs_dir = os.path.join(base_dir, "core_engine", "data_outputs")
     
@@ -68,28 +72,13 @@ def download():
         print("Files in data_outputs:", os.listdir(outputs_dir))
     else:
         print("Outputs directory does not exist at:", outputs_dir)
+        return jsonify({'error': 'Data outputs directory not found'}), 504
     
-    if not domain:
-        return jsonify({'error': 'Missing required parameter: domain'}), 400
-        
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # Strictly target the domain-specific report (removed production_scan.pdf fallback)
+    matched_filename = f"{domain}_executive_risk_report.pdf"
+    pdf_path = os.path.join(outputs_dir, matched_filename)
     
-    possible_filenames = [
-        f"{domain}_executive_risk_report.pdf",
-        "production_scan.pdf"
-    ]
-    
-    pdf_path = None
-    matched_filename = None
-    
-    for filename in possible_filenames:
-        test_path = os.path.join(base_dir, "core_engine", "data_outputs", filename)
-        if os.path.exists(test_path):
-            pdf_path = test_path
-            matched_filename = filename
-            break
-            
-    if pdf_path and matched_filename:
+    if os.path.exists(pdf_path):
         # Read the binary PDF file and encode it as a base64 string for Retool
         with open(pdf_path, "rb") as f:
             encoded_pdf = base64.b64encode(f.read()).decode('utf-8')
