@@ -1,8 +1,14 @@
 import os
 import subprocess
 from flask import Flask, request, jsonify, send_file
+import stripe
+from flask import request, jsonify
 
 app = Flask(__name__)
+
+# =====================================================================
+# SCAN ROUTE
+# =====================================================================
 
 @app.route('/scan', methods=['POST'])
 def scan():
@@ -90,6 +96,39 @@ def download():
         }), 200
     else:
         return jsonify({'error': f'Report PDF for {domain} not found. Please run a scan first.'}), 404
+    
+    
+# =====================================================================
+# STRIPE ROUTE
+# =====================================================================
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+@app.route('/stripe-webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        return jsonify({'error': 'Invalid payload'}), 400
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return jsonify({'error': 'Invalid signature'}), 400
+
+    # Handle the checkout.session.completed event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        customer_email = session.get('customer_email')
+        # TODO: Add your logic here to upgrade user tier in your database
+        print(f" [+] Successful checkout for: {customer_email}")
+
+    return jsonify({'status': 'success'}), 200
 
 
 if __name__ == '__main__':
