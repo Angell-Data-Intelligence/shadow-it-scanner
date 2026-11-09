@@ -2,7 +2,8 @@ import os
 import subprocess
 from flask import Flask, request, jsonify, send_file
 import stripe
-from flask import request, jsonify
+import base64
+
 
 app = Flask(__name__)
 
@@ -61,7 +62,6 @@ def scan():
 # =====================================================================
 # DOWNLOAD ROUTE
 # =====================================================================
-import base64
 
 @app.route('/download', methods=['GET', 'POST'])
 def download():
@@ -99,36 +99,49 @@ def download():
     
     
 # =====================================================================
-# STRIPE ROUTE
+# STRIPE ROUTE (Supports both Live and Test Sandbox automatically)
 # =====================================================================
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+live_webhook_secret = os.getenv("LIVE_STRIPE_WEBHOOK_SECRET")
+test_webhook_secret = os.getenv("TEST_STRIPE_WEBHOOK_SECRET")
 
 @app.route('/stripe-webhook', methods=['POST'])
 def stripe_webhook():
-    payload = request.get_data(as_text=True)
+    payload = request.get_data()
     sig_header = request.headers.get('Stripe-Signature')
 
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
-    except ValueError as e:
-        # Invalid payload
-        return jsonify({'error': 'Invalid payload'}), 400
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        return jsonify({'error': 'Invalid signature'}), 400
+    event = None
+    # Automatically try verifying against whichever secret matches the incoming request
+    secrets = [s for s in [live_webhook_secret, test_webhook_secret] if s]
+    
+    for secret in secrets:
+        try:
+            event = stripe.Webhook.construct_event(payload, sig_header, secret)
+            break
+        except stripe.error.SignatureVerificationError:
+            continue
+        except ValueError:
+            return jsonify({"error": "Invalid payload"}), 400
 
-    # Handle the checkout.session.completed event
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        customer_email = session.get('customer_email')
-        # TODO: Add your logic here to upgrade user tier in your database
+    if not event:
+        return jsonify({"error": "Invalid signature"}), 400
+
+    event_type = event['type']
+    data_object = event['data']['object']
+
+    # Handle lifecycle events
+    if event_type == 'checkout.session.completed':
+        customer_email = data_object.get('customer_email') or data_object.get('customer_details', {}).get('email')
         print(f" [+] Successful checkout for: {customer_email}")
+        
+    elif event_type == 'customer.subscription.updated':
+        print(f" [+] Subscription updated: {data_object.get('id')}")
+        
+    elif event_type == 'customer.subscription.deleted':
+        print(f" [+] Subscription deleted/cancelled: {data_object.get('id')}")
 
-    return jsonify({'status': 'success'}), 200
+    return jsonify({"status": "success"}), 200
 
 
 if __name__ == '__main__':
