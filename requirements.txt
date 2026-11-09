@@ -3,6 +3,7 @@ pandas
 reportlab
 python-dotenv
 flask
+stripe
 gunicorn
 redis
 rq
