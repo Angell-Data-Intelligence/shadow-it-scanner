@@ -108,7 +108,7 @@ test_webhook_secret = os.getenv("TEST_STRIPE_WEBHOOK_SECRET")
 
 @app.route('/stripe-webhook', methods=['POST'])
 def stripe_webhook():
-    payload = request.get_data()
+    payload = request.get_data(as_text=False)
     sig_header = request.headers.get('Stripe-Signature')
 
     event = None
