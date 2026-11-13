@@ -3,6 +3,8 @@ import subprocess
 from flask import Flask, request, jsonify, send_file
 import stripe
 import base64
+import traceback
+
 
 app = Flask(__name__)
 
@@ -24,7 +26,7 @@ def health_check():
 def scan():
     data = request.json or {}
     domain = data.get('domain')
-    tier = data.get('tier', 'scout')
+    tier = data.get('tier', 'scout').strip().lower()
    
     if not domain:
         return jsonify({'error': 'Missing required parameter: domain'}), 400
@@ -108,7 +110,7 @@ test_webhook_secret = os.getenv("TEST_STRIPE_WEBHOOK_SECRET")
 @app.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
     data = request.json or {}
-    tier = data.get('tier', 'scout')
+    tier = data.get('tier', 'scout').strip().lower()
     customer_email = data.get('email')
 
     price_mapping = {
@@ -135,6 +137,7 @@ def create_checkout_session():
         )
         return jsonify({'url': checkout_session.url}), 200
     except Exception as e:
+        print("STRIPE CHECKOUT ERROR:", traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
 
