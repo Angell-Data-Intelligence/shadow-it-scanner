@@ -179,6 +179,31 @@ def stripe_webhook():
 
     return jsonify({"status": "success"}), 200
 
+@app.route('/create-portal-session', methods=['POST'])
+def create_portal_session():
+    data = request.get_json() or {}
+    email = data.get('email')
+    
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+        
+    try:
+        # Find customer by email in Stripe
+        customers = stripe.Customer.list(email=email, limit=1).data
+        if not customers:
+            return jsonify({"error": "No Stripe customer found for this email"}), 404
+            
+        customer_id = customers[0].id
+        
+        # Create Stripe Billing Portal session
+        portal_session = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url="https://angelldataintelligence--shadow-scanner.retool.app",
+        )
+        return jsonify({"url": portal_session.url})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
