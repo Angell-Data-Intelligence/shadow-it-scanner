@@ -188,19 +188,23 @@ def create_portal_session():
         return jsonify({"error": "Email is required"}), 400
         
     try:
-        # Find customer by email in Stripe
+        # Find customer by email in Stripe, or create one if missing
         customers = stripe.Customer.list(email=email, limit=1).data
-        if not customers:
-            return jsonify({"error": "No Stripe customer found for this email"}), 404
+        if customers:
+            customer_id = customers[0].id
+        else:
+            new_customer = stripe.Customer.create(email=email)
+            customer_id = new_customer.id
             
-        customer_id = customers[0].id
-        
         # Create Stripe Billing Portal session
         portal_session = stripe.billing_portal.Session.create(
             customer=customer_id,
             return_url="https://angelldataintelligence--shadow-scanner.retool.app",
         )
         return jsonify({"url": portal_session.url})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
