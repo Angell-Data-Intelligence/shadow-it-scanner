@@ -11,15 +11,15 @@ Automated external attack surface discovery and executive risk profiling platfor
 - **Backend & API:** Python, Flask
 - **Discovery & Analysis:** Custom Python reconnaissance engine, Kali Linux network utilities, Claude API (automated risk synthesis)
 - **Document Generation:** ReportLab (dynamic UTC timestamped executive PDF generation)
-- **Payments & Billing:** Stripe Checkout, Customer Portal, and Webhook event processing (`/stripe-webhook`)
-- **Frontend Interface:** Retool (`https://angelldataintelligence--shadow-scanner.retool.app/`)
-- **Hosting & Infrastructure:** Heroku (`https://angell-data-intelligence-76524b45f214.herokuapp.com/`)
+- **Payments & Billing:** Stripe Checkout, Customer Portal, and Webhook event processing
+- **Frontend Interface:** Retool
+- **Hosting & Infrastructure:** Heroku
 
 ## Key Features
 
 - **Automated Target Domain Audits:** Real-time infrastructure reachability checks, active property mapping, and portfolio concentration analysis.
 - **Executive Risk Profile Generation:** Automatically compiles scan findings into structured, client-ready PDF deliverables featuring portfolio snapshots, key findings, strategic governance recommendations, and scope disclaimers.
-- **Subscription & Webhook Pipeline:** Cryptographically verified Stripe webhook handling (`checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`) for real-time account gating.
+- **Subscription & Webhook Pipeline:** Cryptographically verified Stripe webhook handling for real-time account gating.
 - **Self-Serve Client Dashboard:** Retool-powered interface for executing scans, downloading executive reports, and managing active subscription tiers.
 
 ## Repository Structure
